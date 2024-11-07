@@ -5,6 +5,7 @@ import 'package:groceries_app/model/category.dart';
 import 'package:groceries_app/model/household.dart';
 import 'package:groceries_app/model/item.dart';
 import 'package:groceries_app/model/shopping_list.dart';
+import 'package:groceries_app/model/translated_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_controller.dart';
@@ -23,6 +24,7 @@ class AppState {
   final bool creatingItem;
   final TextEditingController creatingItemName;
   final (List<Category>, List<Item>) searchResult;
+  final Language language;
 
   const AppState(
       {required this.isDarkMode,
@@ -30,7 +32,8 @@ class AppState {
       required this.households,
       required this.creatingItem,
       required this.creatingItemName,
-      required this.searchResult});
+      required this.searchResult,
+      required this.language});
 
   static AppState get initialState => AppState(
         isDarkMode: false,
@@ -39,6 +42,7 @@ class AppState {
         creatingItem: true,
         creatingItemName: TextEditingController(),
         searchResult: ([], []),
+        language: Language.english,
       );
 }
 
@@ -55,6 +59,7 @@ class StateCubit extends Cubit<AppState> {
 
   Future<void> init() async {
     setDarkMode(await getDarkMode());
+    setLanguage(await getLanguage());
     await _initHouseholds();
   }
 
@@ -65,6 +70,7 @@ class StateCubit extends Cubit<AppState> {
     bool? creatingItem,
     TextEditingController? creatingItemName,
     (List<Category>, List<Item>)? searchResult,
+    Language? language,
   }) {
     emit(AppState(
       isDarkMode: isDarkMode ?? state.isDarkMode,
@@ -74,6 +80,7 @@ class StateCubit extends Cubit<AppState> {
       creatingItem: creatingItem ?? state.creatingItem,
       creatingItemName: creatingItemName ?? state.creatingItemName,
       searchResult: searchResult ?? state.searchResult,
+      language: language ?? state.language,
     ));
   }
 
@@ -135,4 +142,10 @@ class StateCubit extends Cubit<AppState> {
       return item == null ? <Item>[] : [item];
     }).toList();
   }
+
+  void setLanguage(Language language) {
+    update(language: language);
+  }
+
+  String getTranslation(TranslatedText text) => text.get(state.language);
 }

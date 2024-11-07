@@ -4,7 +4,8 @@ import "package:groceries_app/logic/firebase_controller.dart";
 import "package:groceries_app/logic/shared_preferences_controller.dart";
 import "package:groceries_app/logic/state_cubit.dart";
 import "package:groceries_app/logic/utils.dart";
-import "package:groceries_app/widget/dark_mode_switch.dart";
+import "package:groceries_app/model/translated_text.dart";
+import "package:groceries_app/widget/options_button.dart";
 import "package:groceries_app/widget/household_card.dart";
 
 class HouseholdsPage extends StatelessWidget {
@@ -16,8 +17,8 @@ class HouseholdsPage extends StatelessWidget {
       final cubit = context.read<StateCubit>();
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Households"),
-          actions: const [DarkModeSwitch()],
+          title: Text(cubit.getTranslation(TranslatedText.households)),
+          actions: const [OptionsButton()],
         ),
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -38,13 +39,15 @@ class HouseholdsPage extends StatelessWidget {
                       context: context,
                       useRootNavigator: false,
                       builder: (context) => AlertDialog(
-                              title: const Text("Create Household"),
+                              title: Text(cubit.getTranslation(
+                                  TranslatedText.createHousehold)),
                               content: TextField(
                                   controller: controller,
                                   onSubmitted: (value) =>
                                       _createHousehold(context, cubit, value),
-                                  decoration: const InputDecoration(
-                                      hintText: "Enter name...")),
+                                  decoration: InputDecoration(
+                                      hintText: cubit.getTranslation(
+                                          TranslatedText.enterName))),
                               actions: [
                                 IconButton(
                                     onPressed: () => _createHousehold(
@@ -62,13 +65,15 @@ class HouseholdsPage extends StatelessWidget {
                       context: context,
                       useRootNavigator: false,
                       builder: (context) => AlertDialog(
-                              title: const Text("Join Household"),
+                              title: Text(cubit.getTranslation(
+                                  TranslatedText.joinHousehold)),
                               content: TextField(
                                   controller: controller,
                                   onSubmitted: (value) =>
                                       _joinHousehold(context, cubit, value),
-                                  decoration: const InputDecoration(
-                                      hintText: "Enter access code...")),
+                                  decoration: InputDecoration(
+                                      hintText: cubit.getTranslation(
+                                          TranslatedText.enterAccessCode))),
                               actions: [
                                 IconButton(
                                     onPressed: () => _joinHousehold(
@@ -92,7 +97,8 @@ class HouseholdsPage extends StatelessWidget {
       await addHouseholdId(household.id);
       cubit.addHousehold(household);
     } else {
-      sendSnackBar(context, "Household must have a name");
+      sendSnackBar(
+          context, cubit.getTranslation(TranslatedText.householdMustHaveName));
     }
     Navigator.of(context).pop();
   }
@@ -105,10 +111,12 @@ class HouseholdsPage extends StatelessWidget {
       if (await addHouseholdId(household.id)) {
         cubit.addHousehold(household);
       } else {
-        sendSnackBar(context, "Cannot join household");
+        sendSnackBar(
+            context, cubit.getTranslation(TranslatedText.cannotJoinHousehold));
       }
     } else {
-      sendSnackBar(context, "Household does not exist");
+      sendSnackBar(
+          context, cubit.getTranslation(TranslatedText.householdDoesNotExist));
     }
     Navigator.of(context).pop();
   }

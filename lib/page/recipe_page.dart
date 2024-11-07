@@ -7,7 +7,7 @@ import 'package:groceries_app/logic/firebase_controller.dart';
 import 'package:groceries_app/logic/state_cubit.dart';
 import 'package:groceries_app/model/item.dart';
 import 'package:groceries_app/page/categories_page.dart';
-import 'package:groceries_app/widget/dark_mode_switch.dart';
+import 'package:groceries_app/widget/options_button.dart';
 import 'package:groceries_app/widget/row_card.dart';
 
 class RecipePage extends StatelessWidget {
@@ -25,7 +25,7 @@ class RecipePage extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           title: Text(recipe.name),
-          actions: const [DarkModeSwitch()],
+          actions: const [OptionsButton()],
         ),
         body: ListView.builder(
           itemCount: items.length,

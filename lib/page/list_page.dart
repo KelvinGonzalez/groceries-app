@@ -9,9 +9,8 @@ import 'package:groceries_app/model/item.dart';
 import 'package:groceries_app/model/recipe.dart';
 import 'package:groceries_app/model/shopping_list.dart';
 import 'package:groceries_app/page/categories_page.dart';
-import 'package:groceries_app/page/recipe_page.dart';
 import 'package:groceries_app/page/recipes_page.dart';
-import 'package:groceries_app/widget/dark_mode_switch.dart';
+import 'package:groceries_app/widget/options_button.dart';
 import 'package:groceries_app/widget/row_card.dart';
 
 class ListPage extends StatelessWidget {
@@ -33,7 +32,7 @@ class ListPage extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           title: Text(shoppingList.name),
-          actions: const [DarkModeSwitch()],
+          actions: const [OptionsButton()],
         ),
         body: Column(
           children: [

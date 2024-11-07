@@ -106,7 +106,7 @@ class FirebaseController {
 
   Future<void> addCategory(String name, int parentId) async {
     if (_reference == null || name.isEmpty) return;
-    WebImage? image = await getValidImage("$name images");
+    WebImage? image = await getValidImage(name);
     final id = randomInt;
     final category = Category(
         id: id,
@@ -138,15 +138,37 @@ class FirebaseController {
     await _reference!.update({"items.${item.id}": FieldValue.delete()});
   }
 
+  Future<void> swapCategoryImage(Category category, WebImage image) async {
+    if (_reference == null) return;
+    await _reference!
+        .update({"categories.${category.id}.image": image.toJson()});
+  }
+
   Future<void> swapItemImage(Item item, WebImage image) async {
     if (_reference == null) return;
     await _reference!.update({"items.${item.id}.image": image.toJson()});
   }
 
-  Future<void> swapCategoryImage(Category category, WebImage image) async {
+  Future<void> changeCategoryName(Category category, String name) async {
     if (_reference == null) return;
-    await _reference!
-        .update({"categories.${category.id}.image": image.toJson()});
+    if (name.trim().isEmpty) return;
+    await _reference!.update({"categories.${category.id}.name": name});
+  }
+
+  Future<void> changeItemName(Item item, String name) async {
+    if (_reference == null) return;
+    if (name.trim().isEmpty) return;
+    await _reference!.update({"items.${item.id}.name": name});
+  }
+
+  Future<void> changeCategoryParent(Category category, int parentId) async {
+    if (_reference == null) return;
+    await _reference!.update({"categories.${category.id}.parentId": parentId});
+  }
+
+  Future<void> changeItemParent(Item item, int parentId) async {
+    if (_reference == null) return;
+    await _reference!.update({"items.${item.id}.parentId": parentId});
   }
 
   Future<DocumentReference<Map<String, dynamic>>>
@@ -154,13 +176,14 @@ class FirebaseController {
     return await _reference!.collection(shoppingListsCollectionName).add({});
   }
 
-  Future<void> createShoppingList(String name) async {
-    if (_reference == null) return;
+  Future<void> createShoppingList(String name, [ShoppingList? original]) async {
+    if (_reference == null || name.isEmpty) return;
     _shoppingListsReference ??= await _createShoppingListDocument();
     final id = randomInt;
+    final items = original?.toJson()["items"];
     final list = {
       "name": name,
-      "items": {},
+      "items": items ?? {},
       "timestamp": FieldValue.serverTimestamp(),
       "isDeleted": false,
     };
@@ -182,6 +205,20 @@ class FirebaseController {
     await getShoppingListReference(shoppingList).update(
       {"${shoppingList.id}.isDeleted": true},
     );
+  }
+
+  Future<void> changeShoppingListName(
+      ShoppingList shoppingList, String name) async {
+    if (_reference == null) return;
+    if (name.trim().isEmpty) return;
+    await getShoppingListReference(shoppingList)
+        .update({"${shoppingList.id}.name": name});
+  }
+
+  Future<void> copyShoppingList(ShoppingList shoppingList, String name) async {
+    if (_reference == null) return;
+    if (name.trim().isEmpty) return;
+    await createShoppingList(name, shoppingList);
   }
 
   Future<void> addItemToList(ShoppingList shoppingList, int itemId,
@@ -225,8 +262,8 @@ class FirebaseController {
   }
 
   Future<void> createRecipe(String name) async {
-    if (_reference == null) return;
-    WebImage? image = await getValidImage("$name images");
+    if (_reference == null || name.isEmpty) return;
+    WebImage? image = await getValidImage(name);
     final recipe = Recipe(
         id: randomInt,
         name: name,
@@ -261,5 +298,11 @@ class FirebaseController {
   Future<void> swapRecipeImage(Recipe recipe, WebImage image) async {
     if (_reference == null) return;
     await _reference!.update({"recipes.${recipe.id}.image": image.toJson()});
+  }
+
+  Future<void> changeRecipeName(Recipe recipe, String name) async {
+    if (_reference == null) return;
+    if (name.trim().isEmpty) return;
+    await _reference!.update({"recipes.${recipe.id}.name": name});
   }
 }
