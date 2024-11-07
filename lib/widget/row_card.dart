@@ -65,15 +65,22 @@ class NamedRowCard extends StatelessWidget {
   final Widget? child;
   final double? height;
   final void Function()? onTap;
+  final void Function()? onLongPress;
 
   const NamedRowCard(
-      {super.key, required this.name, this.child, this.height, this.onTap});
+      {super.key,
+      required this.name,
+      this.child,
+      this.height,
+      this.onTap,
+      this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
     return RowCard(
       height: height,
       onTap: onTap,
+      onLongPress: onLongPress,
       children: [
         Expanded(
           child: Column(

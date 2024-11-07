@@ -44,7 +44,9 @@ class ShoppingList {
 
   Map<String, dynamic> toJson() => {
         "name": name,
-        "items": {for (var item in items) item.itemId: item.toJson()},
+        "items": {
+          for (var item in items) item.itemId.toString(): item.toJson()
+        },
         "timestamp": timestamp,
         "isDeleted": isDeleted,
       };

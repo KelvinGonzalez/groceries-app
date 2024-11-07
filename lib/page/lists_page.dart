@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:groceries_app/logic/firebase_controller.dart';
 import 'package:groceries_app/logic/state_cubit.dart';
+import 'package:groceries_app/model/shopping_list.dart';
+import 'package:groceries_app/model/translated_text.dart';
 import 'package:groceries_app/page/list_page.dart';
 import 'package:groceries_app/widget/confirmation_alert.dart';
-import 'package:groceries_app/widget/dark_mode_switch.dart';
+import 'package:groceries_app/widget/options_button.dart';
+import 'package:groceries_app/widget/menu_dialog.dart';
 import 'package:groceries_app/widget/row_card.dart';
 import 'package:intl/intl.dart';
 
@@ -14,14 +17,15 @@ class ListsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<StateCubit, AppState>(builder: (context, state) {
+      final cubit = context.read<StateCubit>();
       final shoppingLists = state.currentHouseholdState.shoppingLists
               ?.where((e) => !e.isDeleted)
               .toList() ??
           [];
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Shopping Lists"),
-          actions: const [DarkModeSwitch()],
+          title: Text(cubit.getTranslation(TranslatedText.shoppingLists)),
+          actions: const [OptionsButton()],
         ),
         body: ListView.builder(
             itemCount: shoppingLists.length,
@@ -40,22 +44,15 @@ class ListsPage extends StatelessWidget {
                               builder: (context) =>
                                   ListPage(id: shoppingLists[i].id)));
                         },
+                        onLongPress: () {
+                          _showMenu(context, shoppingLists[i]);
+                        },
                       ),
                       IconButton(
                           onPressed: () async {
-                            final answer = await showDialog(
-                                    context: context,
-                                    useRootNavigator: false,
-                                    builder: (context) =>
-                                        const ConfirmationAlert(
-                                            question: "Are you sure?")) ??
-                                false;
-                            if (answer) {
-                              FirebaseController.instance
-                                  .removeShoppingList(shoppingLists[i]);
-                            }
+                            _showMenu(context, shoppingLists[i]);
                           },
-                          icon: const Icon(Icons.close, size: 16)),
+                          icon: const Icon(Icons.menu, size: 16)),
                     ],
                   ),
                 )),
@@ -66,12 +63,14 @@ class ListsPage extends StatelessWidget {
                 context: context,
                 useRootNavigator: false,
                 builder: (context) => AlertDialog(
-                      title: const Text("Create List"),
+                      title:
+                          Text(cubit.getTranslation(TranslatedText.createList)),
                       content: TextField(
                         controller: controller,
                         onSubmitted: (value) => _submit(context, value),
-                        decoration:
-                            const InputDecoration(hintText: "Enter name..."),
+                        decoration: InputDecoration(
+                            hintText:
+                                cubit.getTranslation(TranslatedText.enterName)),
                       ),
                       actions: [
                         IconButton(
@@ -89,5 +88,36 @@ class ListsPage extends StatelessWidget {
   void _submit(BuildContext context, String value) {
     FirebaseController.instance.createShoppingList(value.trim());
     Navigator.pop(context);
+  }
+
+  void _showMenu(BuildContext context, ShoppingList shoppingList) {
+    showDialog(
+        context: context,
+        useRootNavigator: false,
+        builder: (context) => MenuDialog(
+              name: shoppingList.name,
+              changeName: (name) async {
+                await FirebaseController.instance
+                    .changeShoppingListName(shoppingList, name);
+              },
+              copy: (name) async {
+                await FirebaseController.instance
+                    .copyShoppingList(shoppingList, name);
+              },
+              delete: () async {
+                final answer = await showDialog(
+                        context: context,
+                        useRootNavigator: false,
+                        builder: (context) => ConfirmationAlert(
+                            question: context
+                                .read<StateCubit>()
+                                .getTranslation(TranslatedText.areYouSure))) ??
+                    false;
+                if (answer) {
+                  FirebaseController.instance.removeShoppingList(shoppingList);
+                }
+                return answer;
+              },
+            ));
   }
 }
