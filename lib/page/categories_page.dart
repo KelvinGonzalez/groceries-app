@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -98,8 +100,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           ),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: MediaQuery.of(context).size.width ~/
-                                CategoriesPage._itemCardWidth,
+                            crossAxisCount: max(
+                                    (MediaQuery.of(context).size.width /
+                                        CategoriesPage._itemCardWidth),
+                                    1)
+                                .round(),
                             childAspectRatio: 1,
                           ),
                         ),
@@ -278,7 +283,9 @@ Widget itemCard(
                     context: context,
                     useRootNavigator: false,
                     builder: (context) {
-                      final size = MediaQuery.of(context).size.width - 64;
+                      final screenSize = MediaQuery.of(context).size;
+                      final size =
+                          min(screenSize.width, screenSize.height) - 64;
                       return Center(
                         child: SingleChildScrollView(
                           child: Column(
