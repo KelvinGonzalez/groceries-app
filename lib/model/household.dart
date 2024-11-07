@@ -110,8 +110,9 @@ class Household {
     final categorySet = <Category>{};
     final itemSet = <Item>{};
     paths.forEach((item, path) {
-      if (!path.any(
-          (e) => e.parentId == categoryId || item.parentId == categoryId)) {
+      if (path.isNotEmpty &&
+          !path.any(
+              (e) => e.parentId == categoryId || item.parentId == categoryId)) {
         return;
       }
       if (matchesName(query, item.name, "")) {
