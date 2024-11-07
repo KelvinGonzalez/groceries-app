@@ -8,11 +8,10 @@ import 'package:groceries_app/logic/state_cubit.dart';
 import 'package:groceries_app/logic/utils.dart';
 import 'package:groceries_app/model/category.dart';
 import 'package:groceries_app/model/item.dart';
-import 'package:groceries_app/model/web_image.dart';
 import 'package:groceries_app/widget/confirmation_alert.dart';
 import 'package:groceries_app/widget/dark_mode_switch.dart';
 import 'package:groceries_app/widget/fade_in_network_image.dart';
-import 'package:groceries_app/widget/image_selector.dart';
+import 'package:groceries_app/widget/menu_dialog.dart';
 import 'package:groceries_app/widget/row_card.dart';
 
 class CategoriesPage extends StatefulWidget {
@@ -93,8 +92,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                         SliverGrid(
                           delegate: SliverChildBuilderDelegate(
                             (context, i) {
-                              return itemCard(
-                                  context, items[i], true, widget.isSelecting);
+                              return itemCard(context, items[i], true,
+                                  widget.isSelecting, _setParent);
                             },
                             childCount: items.length,
                           ),
@@ -225,17 +224,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
               });
             },
             onLongPress: () async {
-              final image = await showDialog(
-                context: context,
-                useRootNavigator: false,
-                builder: (context) => FutureBuilder(
-                    future: fetchImagesGoogle(category.name),
-                    builder: (context, snapshot) =>
-                        ImageSelector(images: snapshot.data ?? [])),
-              ) as WebImage?;
-              if (image != null) {
-                FirebaseController.instance.swapCategoryImage(category, image);
-              }
+              _showCategoryMenu(context, category);
             },
             children: [
               Padding(
@@ -249,6 +238,35 @@ class _CategoriesPageState extends State<CategoriesPage> {
           ),
           IconButton(
               onPressed: () async {
+                _showCategoryMenu(context, category);
+              },
+              icon: const Icon(Icons.menu, size: 16)),
+        ],
+      ),
+    );
+  }
+
+  void _showCategoryMenu(BuildContext context, Category category) {
+    showDialog(
+        context: context,
+        useRootNavigator: false,
+        builder: (context) => MenuDialog(
+              name: category.name,
+              ignoredId: category.id,
+              changeName: (name) async {
+                await FirebaseController.instance
+                    .changeCategoryName(category, name);
+              },
+              changeImage: (image) async {
+                await FirebaseController.instance
+                    .swapCategoryImage(category, image);
+              },
+              changeParent: (parentId) async {
+                _currentId = parentId;
+                await FirebaseController.instance
+                    .changeCategoryParent(category, parentId);
+              },
+              delete: () async {
                 final answer = await showDialog(
                         context: context,
                         useRootNavigator: false,
@@ -258,16 +276,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 if (answer) {
                   FirebaseController.instance.removeCategory(category);
                 }
+                return answer;
               },
-              icon: const Icon(Icons.close, size: 16)),
-        ],
-      ),
-    );
+            ));
+  }
+
+  _setParent(int parentId) {
+    _currentId = parentId;
   }
 }
 
-Widget itemCard(
-    BuildContext context, Item item, bool clickable, bool selecting) {
+Widget itemCard(BuildContext context, Item item, bool clickable, bool selecting,
+    [void Function(int)? setParent]) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Stack(
@@ -310,17 +330,7 @@ Widget itemCard(
           },
           onLongPress: clickable
               ? () async {
-                  final image = await showDialog(
-                    context: context,
-                    useRootNavigator: false,
-                    builder: (context) => FutureBuilder(
-                        future: fetchImagesGoogle(item.name),
-                        builder: (context, snapshot) =>
-                            ImageSelector(images: snapshot.data ?? [])),
-                  ) as WebImage?;
-                  if (image != null) {
-                    FirebaseController.instance.swapItemImage(item, image);
-                  }
+                  _showItemMenu(context, item, setParent);
                 }
               : null,
           child: Container(
@@ -360,10 +370,35 @@ Widget itemCard(
         if (clickable)
           IconButton(
               onPressed: () {
-                FirebaseController.instance.removeItem(item);
+                _showItemMenu(context, item, setParent);
               },
-              icon: const Icon(Icons.close, size: 16)),
+              icon: const Icon(Icons.menu, size: 16)),
       ],
     ),
   );
+}
+
+void _showItemMenu(BuildContext context, Item item,
+    [void Function(int)? setParent]) {
+  showDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (context) => MenuDialog(
+            name: item.name,
+            changeName: (name) async {
+              await FirebaseController.instance.changeItemName(item, name);
+            },
+            changeImage: (image) async {
+              await FirebaseController.instance.swapItemImage(item, image);
+            },
+            changeParent: (parentId) async {
+              if (setParent != null) setParent(parentId);
+              await FirebaseController.instance
+                  .changeItemParent(item, parentId);
+            },
+            delete: () async {
+              FirebaseController.instance.removeItem(item);
+              return true;
+            },
+          ));
 }

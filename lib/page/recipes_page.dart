@@ -4,11 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:groceries_app/logic/firebase_controller.dart';
 import 'package:groceries_app/logic/state_cubit.dart';
 import 'package:groceries_app/logic/utils.dart';
+import 'package:groceries_app/model/recipe.dart';
 import 'package:groceries_app/model/web_image.dart';
 import 'package:groceries_app/page/recipe_page.dart';
 import 'package:groceries_app/widget/confirmation_alert.dart';
 import 'package:groceries_app/widget/dark_mode_switch.dart';
 import 'package:groceries_app/widget/image_selector.dart';
+import 'package:groceries_app/widget/menu_dialog.dart';
 import 'package:groceries_app/widget/row_card.dart';
 
 class RecipesPage extends StatelessWidget {
@@ -49,18 +51,7 @@ class RecipesPage extends StatelessWidget {
                           }
                         },
                         onLongPress: () async {
-                          final image = await showDialog(
-                            context: context,
-                            useRootNavigator: false,
-                            builder: (context) => FutureBuilder(
-                                future: fetchImagesGoogle(recipes[i].name),
-                                builder: (context, snapshot) =>
-                                    ImageSelector(images: snapshot.data ?? [])),
-                          ) as WebImage?;
-                          if (image != null) {
-                            FirebaseController.instance
-                                .swapRecipeImage(recipes[i], image);
-                          }
+                          _showMenu(context, recipes[i]);
                         },
                         children: [
                           Padding(
@@ -74,19 +65,9 @@ class RecipesPage extends StatelessWidget {
                       ),
                       IconButton(
                           onPressed: () async {
-                            final answer = await showDialog(
-                                    context: context,
-                                    useRootNavigator: false,
-                                    builder: (context) =>
-                                        const ConfirmationAlert(
-                                            question: "Are you sure?")) ??
-                                false;
-                            if (answer) {
-                              FirebaseController.instance
-                                  .removeRecipe(recipes[i]);
-                            }
+                            _showMenu(context, recipes[i]);
                           },
-                          icon: const Icon(Icons.close, size: 16)),
+                          icon: const Icon(Icons.menu, size: 16)),
                     ],
                   ),
                 )),
@@ -115,6 +96,35 @@ class RecipesPage extends StatelessWidget {
         ),
       );
     });
+  }
+
+  void _showMenu(BuildContext context, Recipe recipe) {
+    showDialog(
+        context: context,
+        useRootNavigator: false,
+        builder: (context) => MenuDialog(
+              name: recipe.name,
+              changeName: (name) async {
+                await FirebaseController.instance
+                    .changeRecipeName(recipe, name);
+              },
+              changeImage: (image) async {
+                await FirebaseController.instance
+                    .swapRecipeImage(recipe, image);
+              },
+              delete: () async {
+                final answer = await showDialog(
+                        context: context,
+                        useRootNavigator: false,
+                        builder: (context) => const ConfirmationAlert(
+                            question: "Are you sure?")) ??
+                    false;
+                if (answer) {
+                  FirebaseController.instance.removeRecipe(recipe);
+                }
+                return answer;
+              },
+            ));
   }
 
   void _submit(BuildContext context, String value) {
