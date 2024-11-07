@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:groceries_app/logic/state_cubit.dart';
 import 'package:groceries_app/logic/utils.dart';
+import 'package:groceries_app/model/translated_text.dart';
 import 'package:groceries_app/model/web_image.dart';
 import 'package:groceries_app/page/category_select_page.dart';
 import 'package:groceries_app/widget/image_selector.dart';
@@ -26,8 +29,9 @@ class MenuDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<StateCubit>();
     return AlertDialog(
-      title: const Text("Menu"),
+      title: Text(cubit.getTranslation(TranslatedText.menu)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -39,11 +43,13 @@ class MenuDialog extends StatelessWidget {
                       context: context,
                       useRootNavigator: false,
                       builder: (context) => AlertDialog(
-                            title: const Text("Change Name"),
+                            title: Text(cubit
+                                .getTranslation(TranslatedText.changeName)),
                             content: TextField(
                               controller: controller,
-                              decoration: const InputDecoration(
-                                hintText: "Enter new name...",
+                              decoration: InputDecoration(
+                                hintText: cubit.getTranslation(
+                                    TranslatedText.enterNewName),
                               ),
                               onSubmitted: (value) =>
                                   Navigator.pop(context, value.trim()),
@@ -53,20 +59,22 @@ class MenuDialog extends StatelessWidget {
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
-                                  child: const Text("Cancel")),
+                                  child: Text(cubit
+                                      .getTranslation(TranslatedText.cancel))),
                               TextButton(
                                   onPressed: () {
                                     Navigator.pop(
                                         context, controller.text.trim());
                                   },
-                                  child: const Text("Submit"))
+                                  child: Text(cubit
+                                      .getTranslation(TranslatedText.submit)))
                             ],
                           )) as String?;
                   if (newName != null) {
                     await changeName!(newName);
                   }
                 },
-                child: const Text("Change Name")),
+                child: Text(cubit.getTranslation(TranslatedText.changeName))),
           if (name != null && changeImage != null)
             TextButton(
                 onPressed: () async {
@@ -80,7 +88,7 @@ class MenuDialog extends StatelessWidget {
                     await changeImage!(image);
                   }
                 },
-                child: const Text("Change Image")),
+                child: Text(cubit.getTranslation(TranslatedText.changeImage))),
           if (changeParent != null)
             TextButton(
                 onPressed: () async {
@@ -92,7 +100,8 @@ class MenuDialog extends StatelessWidget {
                     await changeParent!(newParentId);
                   }
                 },
-                child: const Text("Change Location")),
+                child:
+                    Text(cubit.getTranslation(TranslatedText.changeLocation))),
           if (name != null && copy != null)
             TextButton(
               onPressed: () async {
@@ -101,11 +110,13 @@ class MenuDialog extends StatelessWidget {
                     context: context,
                     useRootNavigator: false,
                     builder: (context) => AlertDialog(
-                          title: const Text("Copying"),
+                          title: Text(
+                              cubit.getTranslation(TranslatedText.copying)),
                           content: TextField(
                             controller: controller,
-                            decoration: const InputDecoration(
-                              hintText: "Enter copy name...",
+                            decoration: InputDecoration(
+                              hintText: cubit
+                                  .getTranslation(TranslatedText.enterCopyName),
                             ),
                             onSubmitted: (value) =>
                                 Navigator.pop(context, value.trim()),
@@ -115,20 +126,22 @@ class MenuDialog extends StatelessWidget {
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
-                                child: const Text("Cancel")),
+                                child: Text(cubit
+                                    .getTranslation(TranslatedText.cancel))),
                             TextButton(
                                 onPressed: () {
                                   Navigator.pop(
                                       context, controller.text.trim());
                                 },
-                                child: const Text("Submit"))
+                                child: Text(cubit
+                                    .getTranslation(TranslatedText.submit)))
                           ],
                         )) as String?;
                 if (newName != null) {
                   await copy!(newName);
                 }
               },
-              child: const Text("Copy"),
+              child: Text(cubit.getTranslation(TranslatedText.copy)),
             ),
           if (delete != null)
             TextButton(
@@ -137,7 +150,7 @@ class MenuDialog extends StatelessWidget {
                     Navigator.of(context).pop();
                   }
                 },
-                child: const Text("Delete")),
+                child: Text(cubit.getTranslation(TranslatedText.delete))),
         ],
       ),
     );

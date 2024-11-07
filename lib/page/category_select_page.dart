@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:groceries_app/logic/state_cubit.dart';
-import 'package:groceries_app/widget/dark_mode_switch.dart';
+import 'package:groceries_app/widget/options_button.dart';
 import 'package:groceries_app/widget/row_card.dart';
 
 class CategorySelectPage extends StatefulWidget {
@@ -47,7 +47,7 @@ class _CategorySelectPageState extends State<CategorySelectPage> {
         child: Scaffold(
           appBar: AppBar(
             title: Text(household.categories[_currentId]!.name),
-            actions: const [DarkModeSwitch()],
+            actions: const [OptionsButton()],
           ),
           body: ListView.builder(
             itemCount: categories.length,

@@ -7,6 +7,7 @@ import 'package:groceries_app/logic/shared_preferences_controller.dart';
 import 'package:groceries_app/logic/state_cubit.dart';
 import 'package:groceries_app/logic/utils.dart';
 import 'package:groceries_app/model/household.dart';
+import 'package:groceries_app/model/translated_text.dart';
 import 'package:groceries_app/page/household_page.dart';
 
 class HouseholdCard extends StatelessWidget {
@@ -27,7 +28,8 @@ class HouseholdCard extends StatelessWidget {
         },
         onLongPress: () {
           Clipboard.setData(ClipboardData(text: household.accessCode));
-          sendSnackBar(context, "Access code copied");
+          sendSnackBar(
+              context, cubit.getTranslation(TranslatedText.accessCodeCopied));
         },
         child: Stack(
           alignment: Alignment.topRight,
@@ -54,7 +56,8 @@ class HouseholdCard extends StatelessWidget {
                       style: const TextStyle(fontSize: 18),
                     ),
                     const Divider(),
-                    Text("Access Code: ${household.accessCode}"),
+                    Text(
+                        "${cubit.getTranslation(TranslatedText.accessCode)}: ${household.accessCode}"),
                   ],
                 ),
               ),

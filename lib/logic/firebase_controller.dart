@@ -177,7 +177,7 @@ class FirebaseController {
   }
 
   Future<void> createShoppingList(String name, [ShoppingList? original]) async {
-    if (_reference == null) return;
+    if (_reference == null || name.isEmpty) return;
     _shoppingListsReference ??= await _createShoppingListDocument();
     final id = randomInt;
     final items = original?.toJson()["items"];
@@ -262,7 +262,7 @@ class FirebaseController {
   }
 
   Future<void> createRecipe(String name) async {
-    if (_reference == null) return;
+    if (_reference == null || name.isEmpty) return;
     WebImage? image = await getValidImage(name);
     final recipe = Recipe(
         id: randomInt,

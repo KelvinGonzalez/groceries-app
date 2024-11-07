@@ -8,8 +8,9 @@ import 'package:groceries_app/logic/state_cubit.dart';
 import 'package:groceries_app/logic/utils.dart';
 import 'package:groceries_app/model/category.dart';
 import 'package:groceries_app/model/item.dart';
+import 'package:groceries_app/model/translated_text.dart';
 import 'package:groceries_app/widget/confirmation_alert.dart';
-import 'package:groceries_app/widget/dark_mode_switch.dart';
+import 'package:groceries_app/widget/options_button.dart';
 import 'package:groceries_app/widget/fade_in_network_image.dart';
 import 'package:groceries_app/widget/menu_dialog.dart';
 import 'package:groceries_app/widget/row_card.dart';
@@ -73,7 +74,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       ),
                   ],
                 ),
-                actions: const [DarkModeSwitch()],
+                actions: const [OptionsButton()],
               ),
               body: Column(
                 children: [
@@ -138,8 +139,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                       _onSubmitted(state);
                                     },
                                     decoration: InputDecoration(
-                                      hintText:
-                                          "Enter ${state.creatingItem ? "item" : "category"} name...",
+                                      hintText: _cubit.getTranslation(state
+                                              .creatingItem
+                                          ? TranslatedText.enterItemName
+                                          : TranslatedText.enterCategoryName),
                                       suffixIcon: IconButton(
                                         icon: const Icon(Icons.clear, size: 16),
                                         onPressed: () {
@@ -160,7 +163,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                       onChanged: (value) {
                                         _cubit.update(creatingItem: value);
                                       }),
-                                  const Text("Item"),
+                                  Text(_cubit
+                                      .getTranslation(TranslatedText.item)),
                                   const SizedBox(width: 16),
                                   Radio(
                                       value: false,
@@ -168,7 +172,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                       onChanged: (value) {
                                         _cubit.update(creatingItem: value);
                                       }),
-                                  const Text("Category"),
+                                  Text(_cubit
+                                      .getTranslation(TranslatedText.category)),
                                 ],
                               ),
                             ],
@@ -270,8 +275,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 final answer = await showDialog(
                         context: context,
                         useRootNavigator: false,
-                        builder: (context) => const ConfirmationAlert(
-                            question: "Are you sure?")) ??
+                        builder: (context) => ConfirmationAlert(
+                            question: _cubit
+                                .getTranslation(TranslatedText.areYouSure))) ??
                     false;
                 if (answer) {
                   FirebaseController.instance.removeCategory(category);

@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:groceries_app/logic/firebase_controller.dart';
 import 'package:groceries_app/logic/state_cubit.dart';
-import 'package:groceries_app/logic/utils.dart';
 import 'package:groceries_app/model/recipe.dart';
-import 'package:groceries_app/model/web_image.dart';
+import 'package:groceries_app/model/translated_text.dart';
 import 'package:groceries_app/page/recipe_page.dart';
 import 'package:groceries_app/widget/confirmation_alert.dart';
-import 'package:groceries_app/widget/dark_mode_switch.dart';
-import 'package:groceries_app/widget/image_selector.dart';
+import 'package:groceries_app/widget/options_button.dart';
 import 'package:groceries_app/widget/menu_dialog.dart';
 import 'package:groceries_app/widget/row_card.dart';
 
@@ -21,14 +19,15 @@ class RecipesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<StateCubit, AppState>(builder: (context, state) {
+      final cubit = context.read<StateCubit>();
       final recipes = state.currentHouseholdState.household?.recipes
               .where((e) => !e.isDeleted)
               .toList() ??
           [];
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Recipes"),
-          actions: const [DarkModeSwitch()],
+          title: Text(cubit.getTranslation(TranslatedText.recipes)),
+          actions: const [OptionsButton()],
         ),
         body: ListView.builder(
             itemCount: recipes.length,
@@ -78,12 +77,14 @@ class RecipesPage extends StatelessWidget {
                 context: context,
                 useRootNavigator: false,
                 builder: (context) => AlertDialog(
-                      title: const Text("Create Recipe"),
+                      title: Text(
+                          cubit.getTranslation(TranslatedText.createRecipe)),
                       content: TextField(
                         controller: controller,
                         onSubmitted: (value) => _submit(context, value),
-                        decoration:
-                            const InputDecoration(hintText: "Enter name..."),
+                        decoration: InputDecoration(
+                            hintText:
+                                cubit.getTranslation(TranslatedText.enterName)),
                       ),
                       actions: [
                         IconButton(
@@ -116,8 +117,10 @@ class RecipesPage extends StatelessWidget {
                 final answer = await showDialog(
                         context: context,
                         useRootNavigator: false,
-                        builder: (context) => const ConfirmationAlert(
-                            question: "Are you sure?")) ??
+                        builder: (context) => ConfirmationAlert(
+                            question: context
+                                .read<StateCubit>()
+                                .getTranslation(TranslatedText.areYouSure))) ??
                     false;
                 if (answer) {
                   FirebaseController.instance.removeRecipe(recipe);

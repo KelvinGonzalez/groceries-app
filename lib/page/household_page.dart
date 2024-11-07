@@ -3,10 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:groceries_app/logic/firebase_controller.dart';
 import 'package:groceries_app/logic/state_cubit.dart';
 import 'package:groceries_app/logic/utils.dart';
+import 'package:groceries_app/model/translated_text.dart';
 import 'package:groceries_app/page/categories_page.dart';
 import 'package:groceries_app/page/lists_page.dart';
 import 'package:groceries_app/page/recipes_page.dart';
-import 'package:groceries_app/widget/dark_mode_switch.dart';
+import 'package:groceries_app/widget/options_button.dart';
 
 class HouseholdPage extends StatelessWidget {
   const HouseholdPage({super.key});
@@ -21,29 +22,30 @@ class HouseholdPage extends StatelessWidget {
         if (state.currentHouseholdState.household == null) {
           return const Center(child: CircularProgressIndicator());
         }
+        final cubit = context.read<StateCubit>();
         final household = state.currentHouseholdState.household!;
         return Scaffold(
           appBar: AppBar(
             title: Text(household.name),
-            actions: const [DarkModeSwitch()],
+            actions: const [OptionsButton()],
           ),
           body: Column(
             children: [
               Expanded(
                   child: _cardBase(context,
-                      title: "Shopping Lists",
+                      title: cubit.getTranslation(TranslatedText.shoppingLists),
                       child: Container(),
                       onTap: () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const ListsPage())))),
               Expanded(
                   child: _cardBase(context,
-                      title: "Items",
+                      title: cubit.getTranslation(TranslatedText.items),
                       child: Container(),
                       onTap: () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const CategoriesPage())))),
               Expanded(
                   child: _cardBase(context,
-                      title: "Recipes",
+                      title: cubit.getTranslation(TranslatedText.recipes),
                       child: Container(),
                       onTap: () => Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => const RecipesPage())))),
