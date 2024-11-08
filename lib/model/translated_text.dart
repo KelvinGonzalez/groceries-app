@@ -51,7 +51,11 @@ enum TranslatedText {
   enterCopyName(en: "Enter copy name...", es: "Ingrese nombre de copia..."),
   copy(en: "Copy", es: "Copiar"),
   delete(en: "Delete", es: "Borrar"),
-  ;
+  categoryMatch(
+      en: "Category Recommendation", es: "Recomendación de Categoría"),
+  accept(en: "Accept", es: "Aceptar"),
+  decline(en: "Decline", es: "Rechazar"),
+  categoryRecommendations(en: "Recommendations", es: "Recomendaciones");
 
   const TranslatedText({required this.en, this.es});
 

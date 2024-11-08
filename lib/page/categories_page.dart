@@ -200,14 +200,69 @@ class _CategoriesPageState extends State<CategoriesPage> {
         : _cubit.resetSearchResult();
   }
 
-  void _onSubmitted(AppState state) {
+  void _onSubmitted(AppState state) async {
     final dbController = FirebaseController.instance;
-    if (state.creatingItem) {
-      dbController.addItem(state.creatingItemName.text.trim(), _currentId);
-    } else {
-      dbController.addCategory(state.creatingItemName.text.trim(), _currentId);
-    }
+    final name = state.creatingItemName.text.trim();
     state.creatingItemName.clear();
+    if (state.creatingItem) {
+      final item = await dbController.addItem(name, _currentId);
+      if (item != null && state.categoryRecommendations) {
+        final categories = state
+                .currentHouseholdState.household?.categories.values
+                .where((e) => e.id >= 0 && !e.isDeleted)
+                .toList() ??
+            [];
+        if (categories.isNotEmpty) {
+          findBestCategory(item, categories).then((match) {
+            if (context.mounted) {
+              showDialog(
+                  context: context,
+                  useRootNavigator: false,
+                  builder: (context) => PopScope(
+                        canPop: false,
+                        child: AlertDialog(
+                          title: Text(
+                              "${_cubit.getTranslation(TranslatedText.categoryMatch)} (${item.name})"),
+                          content: RowCard(
+                            imageUrl: match.image.url,
+                            aspectRatio: 5 / 3,
+                            height: 80,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    match.name,
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text(_cubit
+                                    .getTranslation(TranslatedText.decline))),
+                            TextButton(
+                                onPressed: () {
+                                  dbController.changeItemParent(item, match.id);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(_cubit
+                                    .getTranslation(TranslatedText.accept))),
+                          ],
+                        ),
+                      ));
+            }
+          });
+        }
+      }
+    } else {
+      dbController.addCategory(name, _currentId);
+    }
   }
 
   Widget _categoryRow(

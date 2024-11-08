@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const darkModeName = "darkMode";
 const languageName = "language";
+const categoryRecommendationsName = "categoryRecommendations";
 
 Future<bool> addHouseholdId(String id) async {
   final prefs = await SharedPreferences.getInstance();
@@ -43,6 +44,16 @@ Future<Language> getLanguage() async {
 Future<void> setLanguage(Language language) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setString(languageName, language.key);
+}
+
+Future<bool> getCategoryRecommendations() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool(categoryRecommendationsName) ?? true;
+}
+
+Future<void> setCategoryRecommendations(bool value) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(categoryRecommendationsName, value);
 }
 
 Future<List<WebImage>?> getCachedImages(String query) async {

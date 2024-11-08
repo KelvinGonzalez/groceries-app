@@ -25,6 +25,7 @@ class AppState {
   final TextEditingController creatingItemName;
   final (List<Category>, List<Item>) searchResult;
   final Language language;
+  final bool categoryRecommendations;
 
   const AppState(
       {required this.isDarkMode,
@@ -33,7 +34,8 @@ class AppState {
       required this.creatingItem,
       required this.creatingItemName,
       required this.searchResult,
-      required this.language});
+      required this.language,
+      required this.categoryRecommendations});
 
   static AppState get initialState => AppState(
         isDarkMode: false,
@@ -43,6 +45,7 @@ class AppState {
         creatingItemName: TextEditingController(),
         searchResult: ([], []),
         language: Language.english,
+        categoryRecommendations: true,
       );
 }
 
@@ -71,6 +74,7 @@ class StateCubit extends Cubit<AppState> {
     TextEditingController? creatingItemName,
     (List<Category>, List<Item>)? searchResult,
     Language? language,
+    bool? categoryRecommendations,
   }) {
     emit(AppState(
       isDarkMode: isDarkMode ?? state.isDarkMode,
@@ -81,6 +85,8 @@ class StateCubit extends Cubit<AppState> {
       creatingItemName: creatingItemName ?? state.creatingItemName,
       searchResult: searchResult ?? state.searchResult,
       language: language ?? state.language,
+      categoryRecommendations:
+          categoryRecommendations ?? state.categoryRecommendations,
     ));
   }
 
@@ -148,4 +154,8 @@ class StateCubit extends Cubit<AppState> {
   }
 
   String getTranslation(TranslatedText text) => text.get(state.language);
+
+  void setCategoryRecommendations(bool value) {
+    update(categoryRecommendations: value);
+  }
 }
