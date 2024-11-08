@@ -63,6 +63,7 @@ class StateCubit extends Cubit<AppState> {
   Future<void> init() async {
     setDarkMode(await getDarkMode());
     setLanguage(await getLanguage());
+    setCategoryRecommendations(await getCategoryRecommendations());
     await _initHouseholds();
   }
 
