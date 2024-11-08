@@ -56,7 +56,8 @@ class Household {
       ..sort((a, b) => a.name.compareTo(b.name));
     final items = List<Item>.from(Map<String, dynamic>.from(json["items"])
         .entries
-        .map((entry) => Item.fromJson(int.parse(entry.key), entry.value)))
+        .map((entry) => Item.fromJson(int.parse(entry.key), entry.value))
+        .where((e) => !e.isDeleted))
       ..sort((a, b) => a.name.compareTo(b.name));
     return Household(
       id: id,

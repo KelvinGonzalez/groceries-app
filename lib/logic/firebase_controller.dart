@@ -116,8 +116,8 @@ class FirebaseController {
     await _reference!.update({"categories.$id": category.toJson()});
   }
 
-  Future<void> addItem(String name, int parentId) async {
-    if (_reference == null || name.isEmpty) return;
+  Future<Item?> addItem(String name, int parentId) async {
+    if (_reference == null || name.isEmpty) return null;
     WebImage? image = await getValidImage(name);
     final id = randomInt;
     final item = Item(
@@ -126,6 +126,7 @@ class FirebaseController {
         name: name,
         image: image ?? Item.defaultImage);
     await _reference!.update({"items.$id": item.toJson()});
+    return item;
   }
 
   Future<void> removeCategory(Category category) async {
@@ -135,7 +136,7 @@ class FirebaseController {
 
   Future<void> removeItem(Item item) async {
     if (_reference == null) return;
-    await _reference!.update({"items.${item.id}": FieldValue.delete()});
+    await _reference!.update({"items.${item.id}.isDeleted": true});
   }
 
   Future<void> swapCategoryImage(Category category, WebImage image) async {

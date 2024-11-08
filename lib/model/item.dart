@@ -5,6 +5,7 @@ class Item {
   final int parentId;
   final String name;
   final WebImage image;
+  final bool isDeleted;
 
   static const defaultImage = WebImage(
       url:
@@ -15,13 +16,14 @@ class Item {
       {required this.id,
       required this.parentId,
       required this.name,
-      this.image = defaultImage});
+      this.image = defaultImage,
+      this.isDeleted = false});
 
   Map<String, dynamic> toJson() => {
-        "id": id,
         "parentId": parentId,
         "name": name,
         "image": image.toJson(),
+        "isDeleted": isDeleted,
       };
 
   static Item fromJson(int id, Map<String, dynamic> json) => Item(
@@ -29,6 +31,7 @@ class Item {
         parentId: json["parentId"],
         name: json["name"],
         image: WebImage.fromJson(json["image"]),
+        isDeleted: json["isDeleted"] ?? false,
       );
 
   @override

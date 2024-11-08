@@ -13,6 +13,7 @@ class OptionsMenu extends StatelessWidget {
       final cubit = context.read<StateCubit>();
       final darkModeOn = state.isDarkMode;
       final languageOn = state.language == Language.spanish;
+      final categoryRecommendationsOn = state.categoryRecommendations;
       return AlertDialog(
         title: Text(cubit.getTranslation(TranslatedText.options)),
         content: Column(
@@ -71,7 +72,26 @@ class OptionsMenu extends StatelessWidget {
                       setLanguage(language);
                     })
               ],
-            )
+            ),
+            Row(
+              children: [
+                Text(
+                  cubit.getTranslation(TranslatedText.categoryRecommendations),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: categoryRecommendationsOn
+                          ? FontWeight.bold
+                          : FontWeight.normal),
+                ),
+                Expanded(child: Container()),
+                Switch(
+                    value: categoryRecommendationsOn,
+                    onChanged: (value) {
+                      cubit.setCategoryRecommendations(value);
+                      setCategoryRecommendations(value);
+                    })
+              ],
+            ),
           ],
         ),
       );
