@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:groceries_app/logic/firebase_controller.dart';
 import 'package:groceries_app/logic/shared_preferences_controller.dart';
 import 'package:groceries_app/model/category.dart';
 import 'package:groceries_app/model/household.dart';
@@ -7,8 +8,6 @@ import 'package:groceries_app/model/item.dart';
 import 'package:groceries_app/model/shopping_list.dart';
 import 'package:groceries_app/model/translated_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'firebase_controller.dart';
 
 class CurrentHouseholdState {
   final Household? household;
@@ -26,6 +25,7 @@ class AppState {
   final (List<Category>, List<Item>) searchResult;
   final Language language;
   final bool categoryRecommendations;
+  final int categoriesTab;
 
   const AppState(
       {required this.isDarkMode,
@@ -35,7 +35,8 @@ class AppState {
       required this.creatingItemName,
       required this.searchResult,
       required this.language,
-      required this.categoryRecommendations});
+      required this.categoryRecommendations,
+      required this.categoriesTab});
 
   static AppState get initialState => AppState(
         isDarkMode: false,
@@ -46,6 +47,7 @@ class AppState {
         searchResult: ([], []),
         language: Language.english,
         categoryRecommendations: true,
+        categoriesTab: 0,
       );
 }
 
@@ -76,6 +78,7 @@ class StateCubit extends Cubit<AppState> {
     (List<Category>, List<Item>)? searchResult,
     Language? language,
     bool? categoryRecommendations,
+    int? categoriesTab,
   }) {
     emit(AppState(
       isDarkMode: isDarkMode ?? state.isDarkMode,
@@ -88,6 +91,7 @@ class StateCubit extends Cubit<AppState> {
       language: language ?? state.language,
       categoryRecommendations:
           categoryRecommendations ?? state.categoryRecommendations,
+      categoriesTab: categoriesTab ?? state.categoriesTab,
     ));
   }
 
@@ -158,5 +162,9 @@ class StateCubit extends Cubit<AppState> {
 
   void setCategoryRecommendations(bool value) {
     update(categoryRecommendations: value);
+  }
+
+  void setCategoriesTab(int value) {
+    update(categoriesTab: value);
   }
 }

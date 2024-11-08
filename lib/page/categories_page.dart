@@ -48,6 +48,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
         final items = searching
             ? _cubit.getUpdatedSearchItems()
             : household.getItems(_currentId);
+        final allAccessibleItems = (searching
+            ? _cubit.getUpdatedSearchItems()
+            : household.getNestedItems(_currentId))
+          ..sort((a, b) => household.compareItems(a, b));
+        final gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: max(
+                  (MediaQuery.of(context).size.width /
+                      CategoriesPage._itemCardWidth),
+                  1)
+              .round(),
+          childAspectRatio: 1,
+        );
         return PopScope(
             canPop: false,
             onPopInvokedWithResult: (popped, result) {
@@ -76,116 +88,139 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 ),
                 actions: const [OptionsButton()],
               ),
-              body: Column(
-                children: [
-                  Expanded(
-                    child: CustomScrollView(
-                      slivers: [
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, i) {
-                              return _categoryRow(
-                                  context, setState, categories[i]);
-                            },
-                            childCount: categories.length,
-                          ),
-                        ),
-                        SliverGrid(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, i) {
-                              return itemCard(context, items[i], true,
-                                  widget.isSelecting, _setParent);
-                            },
-                            childCount: items.length,
-                          ),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: max(
-                                    (MediaQuery.of(context).size.width /
-                                        CategoriesPage._itemCardWidth),
-                                    1)
-                                .round(),
-                            childAspectRatio: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 0),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: TextField(
-                                    controller: state.creatingItemName,
-                                    onChanged: (value) => _search(),
-                                    onSubmitted: (value) {
-                                      if (widget.isSelecting) {
-                                        final item =
-                                            state.searchResult.$2.firstOrNull;
-                                        if (item != null) {
-                                          Navigator.of(context).pop(item);
-                                          return;
-                                        }
-                                      }
-                                      _onSubmitted(state);
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: _cubit.getTranslation(state
-                                              .creatingItem
-                                          ? TranslatedText.enterItemName
-                                          : TranslatedText.enterCategoryName),
-                                      suffixIcon: IconButton(
-                                        icon: const Icon(Icons.clear, size: 16),
-                                        onPressed: () {
-                                          state.creatingItemName.clear();
-                                          _cubit.resetSearchResult();
-                                        },
-                                      ),
-                                    ),
-                                  )),
-                                  const SizedBox(width: 8.0)
-                                ],
+              body: DefaultTabController(
+                initialIndex: state.categoriesTab,
+                length: 2,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          CustomScrollView(
+                            slivers: [
+                              SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, i) {
+                                    return _categoryRow(
+                                        context, setState, categories[i]);
+                                  },
+                                  childCount: categories.length,
+                                ),
                               ),
-                              Row(
-                                children: [
-                                  Radio(
-                                      value: true,
-                                      groupValue: state.creatingItem,
-                                      onChanged: (value) {
-                                        _cubit.update(creatingItem: value);
-                                      }),
-                                  Text(_cubit
-                                      .getTranslation(TranslatedText.item)),
-                                  const SizedBox(width: 16),
-                                  Radio(
-                                      value: false,
-                                      groupValue: state.creatingItem,
-                                      onChanged: (value) {
-                                        _cubit.update(creatingItem: value);
-                                      }),
-                                  Text(_cubit
-                                      .getTranslation(TranslatedText.category)),
-                                ],
+                              SliverGrid(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, i) {
+                                    return itemCard(context, items[i], true,
+                                        widget.isSelecting, _setParent);
+                                  },
+                                  childCount: items.length,
+                                ),
+                                gridDelegate: gridDelegate,
                               ),
                             ],
                           ),
-                        ),
-                        FloatingActionButton(
-                            onPressed: () => _onSubmitted(state),
-                            child: const Icon(Icons.add)),
-                      ],
+                          GridView.builder(
+                              itemCount: allAccessibleItems.length,
+                              gridDelegate: gridDelegate,
+                              itemBuilder: (context, i) => itemCard(
+                                  context,
+                                  allAccessibleItems[i],
+                                  true,
+                                  widget.isSelecting,
+                                  _setParent))
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    const Divider(height: 0),
+                    TabBar(
+                        onTap: (value) {
+                          _cubit.setCategoriesTab(value);
+                        },
+                        tabs: const [
+                          Tab(
+                            icon: Icon(Icons.list),
+                          ),
+                          Tab(
+                            icon: Icon(Icons.grid_view),
+                          ),
+                        ]),
+                    const Divider(height: 0),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: TextField(
+                                      controller: state.creatingItemName,
+                                      onChanged: (value) => _search(),
+                                      onSubmitted: (value) {
+                                        if (widget.isSelecting) {
+                                          final item =
+                                              state.searchResult.$2.firstOrNull;
+                                          if (item != null) {
+                                            Navigator.of(context).pop(item);
+                                            return;
+                                          }
+                                        }
+                                        _onSubmitted(state);
+                                      },
+                                      decoration: InputDecoration(
+                                        hintText: _cubit.getTranslation(state
+                                                .creatingItem
+                                            ? TranslatedText.enterItemName
+                                            : TranslatedText.enterCategoryName),
+                                        suffixIcon: IconButton(
+                                          icon:
+                                              const Icon(Icons.clear, size: 16),
+                                          onPressed: () {
+                                            state.creatingItemName.clear();
+                                            _cubit.resetSearchResult();
+                                          },
+                                        ),
+                                      ),
+                                    )),
+                                    const SizedBox(width: 8.0)
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Radio(
+                                        value: true,
+                                        groupValue: state.creatingItem,
+                                        onChanged: (value) {
+                                          _cubit.update(creatingItem: value);
+                                        }),
+                                    Text(_cubit
+                                        .getTranslation(TranslatedText.item)),
+                                    const SizedBox(width: 16),
+                                    Radio(
+                                        value: false,
+                                        groupValue: state.creatingItem,
+                                        onChanged: (value) {
+                                          _cubit.update(creatingItem: value);
+                                        }),
+                                    Text(_cubit.getTranslation(
+                                        TranslatedText.category)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          FloatingActionButton(
+                              onPressed: () => _onSubmitted(state),
+                              child: const Icon(Icons.add)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ));
       },

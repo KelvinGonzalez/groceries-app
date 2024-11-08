@@ -83,6 +83,16 @@ class Household {
     return items.values.where((e) => e.parentId == categoryId).toList();
   }
 
+  List<Item> getNestedItems(int categoryId) {
+    final paths = {for (var item in items.values) item: getItemPath(item)};
+    return items.values
+        .where((item) =>
+            categoryId == -1 ||
+            (paths[item]?.any((category) => category.id == categoryId) ??
+                false))
+        .toList();
+  }
+
   // Result is from nearest -> root
   List<Category> getItemPath(Item item, [int limitId = -1]) {
     final path = <Category>[];
